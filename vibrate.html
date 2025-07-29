@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bir Sorun Var Gibi...</title>
+    <title>Cihaz Kontrolü Gerekli!</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -38,7 +38,7 @@
             margin-bottom: 30px;
         }
         button {
-            background-color: #5cb85c;
+            background-color: #007bff; /* Mavi renk, daha çok "kontrol" hissi verir */
             color: white;
             border: none;
             padding: 12px 25px;
@@ -46,8 +46,15 @@
             font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin: 10px;
         }
         button:hover {
+            background-color: #0056b3;
+        }
+        #stopVibration {
+            background-color: #5cb85c; /* Yeşil renk durdurmak için */
+        }
+        #stopVibration:hover {
             background-color: #4cae4c;
         }
         .warning-icon {
@@ -59,48 +66,50 @@
 </head>
 <body>
     <div class="container">
-        <div class="warning-icon">&#9888;</div> <h1>Cihazınızda Bir Anormallik Tespit Edildi!</h1>
-        <p id="message">Lütfen cihazınızı kontrol edin. Tuhaf bir durum olabilir...</p>
-        <button id="stopVibration">Her Şey Normal, Durdur!</button>
+        <div class="warning-icon">&#9888;</div> <h1>Cihazınızda Garip Bir Durum Olabilir!</h1>
+        <p id="message">Telefonunuzda bir sorun olup olmadığını kontrol etmek için lütfen aşağıdaki düğmeye basın.</p>
+        <button id="startButton">Kontrol Et!</button>
+        <button id="stopVibration" style="display:none;">Her Şey Normal, Durdur!</button>
     </div>
 
     <script>
         let vibrationInterval;
 
         function startVibration() {
-            // Check for vibration support
             if (navigator.vibrate) {
-                // Vibrate for 100ms, pause for 200ms, repeat
-                navigator.vibrate([100, 200]);
-                // Repeat every 500ms
+                navigator.vibrate([100, 200]); // Initial vibration
                 vibrationInterval = setInterval(() => {
                     navigator.vibrate([100, 200]);
                 }, 500);
+                document.getElementById('startButton').style.display = 'none'; // Hide start button
+                document.getElementById('stopVibration').style.display = 'inline-block'; // Show stop button
+                document.getElementById('message').innerText = "Evet, garip bir titreşim var! Sorunu çözmek için 'Durdur'a basın.";
             } else {
-                // If vibration is not supported, update message
                 document.getElementById('message').innerText = "Cihazınız titreşimi desteklemiyor veya izin verilmiyor. Ancak yine de bir sorun var gibi görünüyor...";
+                document.getElementById('startButton').style.display = 'none';
             }
         }
 
         function stopVibration() {
             if (vibrationInterval) {
                 clearInterval(vibrationInterval);
-                vibrationInterval = null; // Clear the interval ID
+                vibrationInterval = null;
             }
             if (navigator.vibrate) {
-                navigator.vibrate(0); // Stop any ongoing vibration
+                navigator.vibrate(0);
             }
             document.getElementById('message').innerText = "Sorun giderildi! Her şey yolunda görünüyor.";
-            document.getElementById('stopVibration').style.display = 'none'; // Hide the button
+            document.getElementById('stopVibration').style.display = 'none';
+            document.getElementById('startButton').style.display = 'none'; // Ensure start button stays hidden
             document.querySelector('h1').innerText = "Neyse ki çözüldü!";
             document.querySelector('.warning-icon').style.color = '#5cb85c'; // Change icon color to green
             document.querySelector('.warning-icon').innerHTML = '&#10003;'; // Change icon to tick
         }
 
-        // Start vibration when the page loads
-        window.onload = startVibration;
+        // Event listener for the start button
+        document.getElementById('startButton').addEventListener('click', startVibration);
 
-        // Stop vibration when the button is clicked
+        // Event listener for the stop button
         document.getElementById('stopVibration').addEventListener('click', stopVibration);
 
         // Optional: Stop vibration when the tab is closed or navigated away
@@ -108,14 +117,12 @@
             stopVibration();
         };
 
-        // For better user experience, automatically stop vibration if tab loses focus (e.g., user switches apps)
-        // This makes it less "malicious" and more of a fun prank.
+        // Automatically stop vibration if tab loses focus (e.g., user switches apps)
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 stopVibration();
             }
         });
-
     </script>
 </body>
 </html>
