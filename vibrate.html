@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bir Sorun Var Gibi...</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #d9534f;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .warning-icon {
+            font-size: 4em;
+            color: #d9534f;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="warning-icon">&#9888;</div> <h1>Cihazınızda Bir Anormallik Tespit Edildi!</h1>
+        <p id="message">Lütfen cihazınızı kontrol edin. Tuhaf bir durum olabilir...</p>
+        <button id="stopVibration">Her Şey Normal, Durdur!</button>
+    </div>
+
+    <script>
+        let vibrationInterval;
+
+        function startVibration() {
+            // Check for vibration support
+            if (navigator.vibrate) {
+                // Vibrate for 100ms, pause for 200ms, repeat
+                navigator.vibrate([100, 200]);
+                // Repeat every 500ms
+                vibrationInterval = setInterval(() => {
+                    navigator.vibrate([100, 200]);
+                }, 500);
+            } else {
+                // If vibration is not supported, update message
+                document.getElementById('message').innerText = "Cihazınız titreşimi desteklemiyor veya izin verilmiyor. Ancak yine de bir sorun var gibi görünüyor...";
+            }
+        }
+
+        function stopVibration() {
+            if (vibrationInterval) {
+                clearInterval(vibrationInterval);
+                vibrationInterval = null; // Clear the interval ID
+            }
+            if (navigator.vibrate) {
+                navigator.vibrate(0); // Stop any ongoing vibration
+            }
+            document.getElementById('message').innerText = "Sorun giderildi! Her şey yolunda görünüyor.";
+            document.getElementById('stopVibration').style.display = 'none'; // Hide the button
+            document.querySelector('h1').innerText = "Neyse ki çözüldü!";
+            document.querySelector('.warning-icon').style.color = '#5cb85c'; // Change icon color to green
+            document.querySelector('.warning-icon').innerHTML = '&#10003;'; // Change icon to tick
+        }
+
+        // Start vibration when the page loads
+        window.onload = startVibration;
+
+        // Stop vibration when the button is clicked
+        document.getElementById('stopVibration').addEventListener('click', stopVibration);
+
+        // Optional: Stop vibration when the tab is closed or navigated away
+        window.onbeforeunload = function() {
+            stopVibration();
+        };
+
+        // For better user experience, automatically stop vibration if tab loses focus (e.g., user switches apps)
+        // This makes it less "malicious" and more of a fun prank.
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopVibration();
+            }
+        });
+
+    </script>
+</body>
+</html>
