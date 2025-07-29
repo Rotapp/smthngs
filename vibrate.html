@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cihaz Kontrolü Gerekli!</title>
+    <title>Bir Mesajınız Var!</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -28,7 +28,7 @@
             width: 100%;
         }
         h1 {
-            color: #d9534f;
+            color: #4CAF50; /* Yeşil renk */
             margin-bottom: 20px;
             font-size: 1.8em;
         }
@@ -37,92 +37,64 @@
             line-height: 1.6;
             margin-bottom: 30px;
         }
-        button {
-            background-color: #007bff; /* Mavi renk, daha çok "kontrol" hissi verir */
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin: 10px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #stopVibration {
-            background-color: #5cb85c; /* Yeşil renk durdurmak için */
-        }
-        #stopVibration:hover {
-            background-color: #4cae4c;
-        }
-        .warning-icon {
+        .icon {
             font-size: 4em;
-            color: #d9534f;
+            color: #FFC107; /* Sarımsı renk */
             margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="warning-icon">&#9888;</div> <h1>Cihazınızda Garip Bir Durum Olabilir!</h1>
-        <p id="message">Telefonunuzda bir sorun olup olmadığını kontrol etmek için lütfen aşağıdaki düğmeye basın.</p>
-        <button id="startButton">Kontrol Et!</button>
-        <button id="stopVibration" style="display:none;">Her Şey Normal, Durdur!</button>
+        <div class="icon">&#128226;</div> <h1>Önemli Bir Bildirim Aldınız!</h1>
+        <p>Telefonunuzda yeni bir etkinlik var. Lütfen cihazınızı kontrol edin.</p>
+        <p style="font-size:0.9em; color:#777;">(Bu mesaj otomatik olarak oluşmuştur.)</p>
+        
+        <audio id="prankAudio" src="prank_sound.mp3" preload="auto"></audio>
     </div>
 
     <script>
-        let vibrationInterval;
+        const audio = document.getElementById('prankAudio');
 
-        function startVibration() {
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 200]); // Initial vibration
-                vibrationInterval = setInterval(() => {
-                    navigator.vibrate([100, 200]);
-                }, 500);
-                document.getElementById('startButton').style.display = 'none'; // Hide start button
-                document.getElementById('stopVibration').style.display = 'inline-block'; // Show stop button
-                document.getElementById('message').innerText = "Evet, garip bir titreşim var! Sorunu çözmek için 'Durdur'a basın.";
-            } else {
-                document.getElementById('message').innerText = "Cihazınız titreşimi desteklemiyor veya izin verilmiyor. Ancak yine de bir sorun var gibi görünüyor...";
-                document.getElementById('startButton').style.display = 'none';
+        function playSound() {
+            // Check if play is allowed, often requires user interaction
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Audio played successfully
+                    console.log("Ses oynatıldı.");
+                })
+                .catch(error => {
+                    // Autoplay was prevented. Show a message or a play button.
+                    console.error("Ses otomatik oynatılamadı, kullanıcı etkileşimi gerekebilir:", error);
+                    document.getElementById('message').innerText = "Bir bildirim aldınız, ancak telefonunuz sesi otomatik oynatmadı. Lütfen sesi dinlemek için ekrana dokunun.";
+                    
+                    // Add a button to play if autoplay fails
+                    const playButton = document.createElement('button');
+                    playButton.innerText = 'Sesi Dinle';
+                    playButton.style.marginTop = '20px';
+                    playButton.style.backgroundColor = '#007bff';
+                    playButton.style.color = 'white';
+                    playButton.style.border = 'none';
+                    playButton.style.padding = '10px 20px';
+                    playButton.style.borderRadius = '5px';
+                    playButton.style.cursor = 'pointer';
+                    playButton.onclick = () => {
+                        audio.play();
+                        playButton.style.display = 'none'; // Hide button after click
+                    };
+                    document.querySelector('.container').appendChild(playButton);
+                });
             }
         }
 
-        function stopVibration() {
-            if (vibrationInterval) {
-                clearInterval(vibrationInterval);
-                vibrationInterval = null;
-            }
-            if (navigator.vibrate) {
-                navigator.vibrate(0);
-            }
-            document.getElementById('message').innerText = "Sorun giderildi! Her şey yolunda görünüyor.";
-            document.getElementById('stopVibration').style.display = 'none';
-            document.getElementById('startButton').style.display = 'none'; // Ensure start button stays hidden
-            document.querySelector('h1').innerText = "Neyse ki çözüldü!";
-            document.querySelector('.warning-icon').style.color = '#5cb85c'; // Change icon color to green
-            document.querySelector('.warning-icon').innerHTML = '&#10003;'; // Change icon to tick
-        }
+        // Try to play sound as soon as the page loads
+        window.onload = playSound;
 
-        // Event listener for the start button
-        document.getElementById('startButton').addEventListener('click', startVibration);
+        // Optionally, make it play when user first interacts with the page (if autoplay is blocked)
+        document.addEventListener('click', playSound, { once: true }); // Plays only once on first click
 
-        // Event listener for the stop button
-        document.getElementById('stopVibration').addEventListener('click', stopVibration);
-
-        // Optional: Stop vibration when the tab is closed or navigated away
-        window.onbeforeunload = function() {
-            stopVibration();
-        };
-
-        // Automatically stop vibration if tab loses focus (e.g., user switches apps)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                stopVibration();
-            }
-        });
     </script>
 </body>
 </html>
