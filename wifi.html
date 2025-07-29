@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bir Mesajınız Var!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #4CAF50; /* Yeşil renk */
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .icon {
+            font-size: 4em;
+            color: #FFC107; /* Sarımsı renk */
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">&#128226;</div> <h1>Önemli Bir Bildirim Aldınız!</h1>
+        <p>Telefonunuzda yeni bir etkinlik var. Lütfen cihazınızı kontrol edin.</p>
+        <p style="font-size:0.9em; color:#777;">(Bu mesaj otomatik olarak oluşmuştur.)</p>
+        
+        <audio id="prankAudio" src="prank_sound.mp3" preload="auto"></audio>
+    </div>
+
+    <script>
+        const audio = document.getElementById('prankAudio');
+
+        function playSound() {
+            // Check if play is allowed, often requires user interaction
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Audio played successfully
+                    console.log("Ses oynatıldı.");
+                })
+                .catch(error => {
+                    // Autoplay was prevented. Show a message or a play button.
+                    console.error("Ses otomatik oynatılamadı, kullanıcı etkileşimi gerekebilir:", error);
+                    document.getElementById('message').innerText = "Bir bildirim aldınız, ancak telefonunuz sesi otomatik oynatmadı. Lütfen sesi dinlemek için ekrana dokunun.";
+                    
+                    // Add a button to play if autoplay fails
+                    const playButton = document.createElement('button');
+                    playButton.innerText = 'Sesi Dinle';
+                    playButton.style.marginTop = '20px';
+                    playButton.style.backgroundColor = '#007bff';
+                    playButton.style.color = 'white';
+                    playButton.style.border = 'none';
+                    playButton.style.padding = '10px 20px';
+                    playButton.style.borderRadius = '5px';
+                    playButton.style.cursor = 'pointer';
+                    playButton.onclick = () => {
+                        audio.play();
+                        playButton.style.display = 'none'; // Hide button after click
+                    };
+                    document.querySelector('.container').appendChild(playButton);
+                });
+            }
+        }
+
+        // Try to play sound as soon as the page loads
+        window.onload = playSound;
+
+        // Optionally, make it play when user first interacts with the page (if autoplay is blocked)
+        document.addEventListener('click', playSound, { once: true }); // Plays only once on first click
+
+    </script>
+</body>
+</html>
